@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+</head>
+
+<body>
+
+  <p>Drag Fish pond.</p>
+
+  <div id="test" style="height: 100px;">
+      <img src="img/fish-pond.png" id="pond" onclick="clonePond()">
+      <img src="img/stone-floor.png" id="floor">
+  </div>
+
+  <div><img src="img/full_background.jpg" id="gate" class="droppable"></div>
+
+  <script>
+    let currentDroppable = null;
+    var i = 2;
+    function clonePond(){
+      var pondTest = "pond"+i;
+      var elem = document.createElement("img");
+      elem.setAttribute("src", "img/fish-pond.png");
+      elem.setAttribute("class", "signature");
+      elem.setAttribute("id", pondTest);
+      i++;
+      test.append(elem);
+    }
+    
+    $(document).on("mousedown", ".signature", function (event) {
+
+      let shiftX = event.clientX - this.getBoundingClientRect().left;
+      let shiftY = event.clientY - this.getBoundingClientRect().top;
+
+      this.style.position = 'absolute';
+      this.style.zIndex = 1000;
+      document.body.append(this);
+
+      this.style.left = event.pageX - shiftX + 'px';
+      this.style.top = event.pageY - shiftY + 'px';
+
+      function onMouseMove(event) {
+        var x = "#"+event.target.id;
+        $(x).css("left",event.pageX - shiftX + 'px');
+        $(x).css("top",event.pageY - shiftY + 'px');
+        // x.style.left = event.pageX - shiftX + 'px';
+        // x.style.top = event.pageY - shiftY + 'px';
+
+        $(x).hidden = true;
+        let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+        $(x).hidden = false;
+
+        if (!elemBelow) return;
+
+        let droppableBelow = elemBelow.closest('.droppable');
+        if (currentDroppable != droppableBelow) {
+          if (currentDroppable) { // null when we were not over a droppable before this event
+            leaveDroppable(currentDroppable);
+          }
+          currentDroppable = droppableBelow;
+          if (currentDroppable) { // null if we're not coming over a droppable now
+            // (maybe just left the droppable)
+            enterDroppable(currentDroppable);
+          }
+        }
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+
+      $(document).on("mouseup", ".signature", function () {
+        document.removeEventListener('mousemove', onMouseMove);
+        this.onmouseup = null;
+      });
+
+    });
+
+    function enterDroppable(elem) {
+      elem.style.background = 'pink';
+    }
+
+    function leaveDroppable(elem) {
+      elem.style.background = '';
+    }
+
+    this.ondragstart = function() {
+      return false;
+    };
+  </script>
+
+
+</body>
+</html>
